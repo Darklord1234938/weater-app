@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recoder</title>
+
+<!-- Alpine.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- TailwindCSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body x-data="Weather()" class="min-h-screen bg-gradient-to-br from-sky-600 to-blue-900 flex items-center justify-center p-6">
+
+    <div class="bg-white/20 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full text-white space-y-6">
+
+        <!-- Search -->
+        <div class="flex gap-2">
+            <input 
+                type="text"
+                x-model="city" 
+                placeholder="Enter city…" 
+                class="flex-1 px-4 py-2 rounded-xl bg-white/30 placeholder-white text-white focus:outline-none">
+            
+            <button 
+                @click="GetWeather()"
+                class="px-4 py-2 bg-white/30 rounded-xl font-semibold hover:bg-white/40 transition">
+                Weather
+            </button>
+        </div>
+
+        <!-- City + Time -->
+        <div class="text-center">
+            <h2 class="text-3xl font-bold" x-text="city"></h2>
+            <p class="opacity-80" x-text="time"></p>
+        </div>
+
+        <!-- Icon -->
+        <div class="flex justify-center">
+            <img :src="conIcon" alt="" class="w-32 h-32 drop-shadow-lg">
+        </div>
+
+        <!-- Weather Info -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Country</p>
+                <p x-text="country"></p>
+            </div>
+
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Region</p>
+                <p x-text="reg"></p>
+            </div>
+
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Condition</p>
+                <p x-text="conTxt"></p>
+            </div>
+
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Clouds</p>
+                <p x-text="cloud"></p>
+            </div>
+
+            <!-- Temperature -->
+            <div class="bg-white/10 p-4 rounded-xl col-span-2 text-center">
+                <p class="text-5xl font-bold" x-text="c + '°C'"></p>
+                <p class="opacity-80">Feels like <span x-text="feelC"></span>°C</p>
+            </div>
+
+            <!-- Wind -->
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Wind</p>
+                <p><span x-text="windKmU"></span> km/h</p>
+                <p>Dir: <span x-text="windDir"></span></p>
+                <p>Deg: <span x-text="windDegree"></span>°</p>
+                <p>Gust: <span x-text="gustKph"></span> km/h</p>
+            </div>
+
+            <!-- Air -->
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Air Quality</p>
+                <p>CO: <span x-text="airCo"></span></p>
+                <p>NO₂: <span x-text="airNo"></span></p>
+                <p>O₃: <span x-text="airO"></span></p>
+                <p>PM 10: <span x-text="airPmTen"></span></p>
+                <p>PM 2.5: <span x-text="airPm"></span></p>
+            </div>
+
+            <!-- Misc -->
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Humidity</p>
+                <p x-text="humidity"></p>
+            </div>
+
+            <div class="bg-white/10 p-4 rounded-xl">
+                <p class="font-semibold">Precip (mm)</p>
+                <p x-text="precipMm"></p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+<script>
+    function Weather(){
+        return{
+            c:"", 
+            dewC:"",
+            feelC:"",
+            heatC:"",
+            reg:"",
+            city:"",
+            country:"",
+            time:"",
+            cloud:"",
+            windchill:"",
+            windKmU:"",
+            windDir:"",
+            windDegree:"",
+            druk:"",
+            precipMm:"",
+            pressureMb:"",
+            humidity:"",
+            gustKph:"",
+            conTxt:"",
+            conIcon:"",
+            airCo:"",
+            airGb:"",
+            airNo:"",
+            airO:"",
+            airPmTen:"",
+            airpm:"",
+            airSo:"",
+            uv:"",
+            visKm:"",
+
+            /*
+dewpoint_f: 35.4
+feelslike_f: 32.7
+gust_mph: 24.4
+heatindex_f: 41.8
+precip_in: 0
+pressure_in: 29.97
+temp_f: 41.2
+vis_miles: 2
+wind_mph: 17.2
+windchill_f: 33.5
+            */
+            
+            GetWeather(){
+                fetch("https://api.weatherapi.com/v1/current.json?key=ea2e7c3147e248bf91e145718252102&q=" + this.city + "&aqi=yes")
+                    .then(response => response.json())
+                    .then(data => {
+                        this.dewC = data.current.dewpoint_c;
+                        this.feelC = data.current.feelslike_c;
+                        this.gustKph = data.current.gust_kph;
+                        this.heatC = data.current.heatindex_c;
+                        this.humidity = data.current.humidity;
+                        this.precipMm = data.current.precip_mm;
+                        this.pressureMb = data.current.pressure_mb;
+                        this.c = data.current.temp_c;
+                        this.humidity = data.current.humidity;
+                        this.uv = data.current.uv;
+                        this.visKm = data.current.vis_km;
+                        this.windDegree = data.current.wind_degree;
+                        this.windDir = data.current.wind_dir;
+                        this.windKmU = data.current.wind_kph;
+                        this.windchill = data.current.windchill_c;
+                        this.airCo = data.current.air_quality.co;
+                        this.airNo = data.current.air_quality.no2;
+                        this.airO = data.current.air_quality.o3;
+                        this.airPmTen = data.current.air_quality.pm10;
+                        this.airpm = data.current.air_quality.pm2_5;
+                        this.airSo = data.current.air_quality.so2;
+                        this.cloud = data.current.cloud;
+                        this.conTxt = data.current.condition.text;
+                        this.conIcon = data.current.condition.icon;
+                        this.reg = data.location.region;
+                        this.country = data.location.country;
+                        this.time = data.location.localtime;
+                        console.log(data);
+                    });
+            }
+        }
+    }
+</script>
+</html>
