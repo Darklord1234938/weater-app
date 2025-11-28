@@ -230,7 +230,7 @@ windchill_f: 33.5
             */
             
             GetWeather(){
-                fetch("http://api.weatherapi.com/v1/forecast.json?key=ea2e7c3147e248bf91e145718252102&q=&q=" + this.city + "&days=3&aqi=yes")
+                fetch("https://api.weatherapi.com/v1/forecast.json?key=ea2e7c3147e248bf91e145718252102&q=&q=" + this.city + "&days=3&aqi=yes")
                     .then(response => response.json())
                     .then(data => {
                         this.dewC = data.current.dewpoint_c;
