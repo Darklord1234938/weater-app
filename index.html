@@ -3,20 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recoder</title>
+<title>Weather App</title>
 
 <!-- Alpine.js -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 <!-- TailwindCSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body x-data="Weather()" class="min-h-screen bg-gradient-to-br from-sky-600 to-blue-900 flex items-center justify-center p-6">
 
-    <div class="bg-white/20 backdrop-blur-xl p-8 rounded-3xl shadow-2xl max-w-md w-full text-white space-y-6">
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+</script>
+
+</head>
+<body x-data="Weather()" class="min-h-screen bg-gradient-to-br from-sky-600 to-blue-900 flex items-center justify-center p-6" >
+
+    <div class="bg-white/20 backdrop-blur-xl p-7 rounded-3xl shadow-2xl 
+            w-full max-w-xl text-white space-y-6 transform scale-[1.01]">
 
         <!-- Search -->
-        <div class="flex gap-2">
+        <button 
+            @click="if(alone) {alone = false}else{alone = true}"
+            class="px-12 py-2 bg-white/30 rounded-xl font-semibold hover:bg-white/40 transition">
+            Dash board
+        </button>
+        <div class="flex gap-1">
             <input 
                 type="text"
                 x-model="city" 
@@ -30,75 +42,138 @@
             </button>
         </div>
 
-        <!-- City + Time -->
-        <div class="text-center">
-            <h2 class="text-3xl font-bold" x-text="city"></h2>
-            <p class="opacity-80" x-text="time"></p>
+        <div x-show="alone">
+            <!-- City + Time -->
+            <div class="text-center">
+                <h2 class="text-3xl font-bold" x-text="city"></h2>
+                <p class="opacity-80" x-text="time"></p>
+            </div>
+
+            <!-- Icon -->
+            <div class="flex justify-center">
+                <img :src="conIcon" alt="" class="w-32 h-32 drop-shadow-lg">
+            </div>
+
+            <!-- Weather Info -->
+            <div class="grid grid-cols-2 gap-4 text-sm">
+
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Country</p>
+                    <p x-text="country"></p>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Region</p>
+                    <p x-text="reg"></p>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Condition</p>
+                    <p x-text="conTxt"></p>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Clouds</p>
+                    <p x-text="cloud"></p>
+                </div>
+
+                <!-- Temperature -->
+                <div class="bg-white/10 p-4 rounded-xl col-span-2 text-center">
+                    <p class="text-5xl font-bold" x-text="c + '°C'"></p>
+                    <p class="opacity-80">Feels like <span x-text="feelC"></span>°C</p>
+                </div>
+
+                <!-- Wind -->
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Wind</p>
+                    <p><span x-text="windKmU"></span> km/h</p>
+                    <p>Dir: <span x-text="windDir"></span></p>
+                    <p>Deg: <span x-text="windDegree"></span>°</p>
+                    <p>Gust: <span x-text="gustKph"></span> km/h</p>
+                </div>
+
+                <!-- Air -->
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Air Quality</p>
+                    <p>CO: <span x-text="airCo"></span></p>
+                    <p>NO₂: <span x-text="airNo"></span></p>
+                    <p>O₃: <span x-text="airO"></span></p>
+                    <p>PM 10: <span x-text="airPmTen"></span></p>
+                </div>
+
+                <!-- Misc -->
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Humidity</p>
+                    <p x-text="humidity"></p>
+                </div>
+
+                <div class="bg-white/10 p-4 rounded-xl">
+                    <p class="font-semibold">Precip (mm)</p>
+                    <p x-text="precipMm"></p>
+                </div>
+            </div>
         </div>
 
-        <!-- Icon -->
-        <div class="flex justify-center">
-            <img :src="conIcon" alt="" class="w-32 h-32 drop-shadow-lg">
-        </div>
+        <div x-show="!alone">
+           <!-- Vertical scroll container -->
+<div class="h-[500px] overflow-y-auto space-y-4 p-4">
+    <ul class="flex flex-col gap-4">
 
-        <!-- Weather Info -->
-        <div class="grid grid-cols-2 gap-4 text-sm">
+        <template x-for="(f, i) in forecast" :key="i">
+            <li class="bg-white/20 backdrop-blur-md border border-white/30 rounded-xl p-5 
+                       shadow-md hover:shadow-lg transition-all">
 
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Country</p>
-                <p x-text="country"></p>
-            </div>
+                <canvas :id="'chart_' + i" class="rounded-lg">
 
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Region</p>
-                <p x-text="reg"></p>
-            </div>
+                </canvas>
+                <canvas :id="'chartR_' + i" class="rounded-lg">
 
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Condition</p>
-                <p x-text="conTxt"></p>
-            </div>
+                </canvas>
 
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Clouds</p>
-                <p x-text="cloud"></p>
-            </div>
 
-            <!-- Temperature -->
-            <div class="bg-white/10 p-4 rounded-xl col-span-2 text-center">
-                <p class="text-5xl font-bold" x-text="c + '°C'"></p>
-                <p class="opacity-80">Feels like <span x-text="feelC"></span>°C</p>
-            </div>
+                <!-- DATE -->
+                <strong class="text-lg font-medium mb-2 text-white" x-text="f.date"></strong>
 
-            <!-- Wind -->
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Wind</p>
-                <p><span x-text="windKmU"></span> km/h</p>
-                <p>Dir: <span x-text="windDir"></span></p>
-                <p>Deg: <span x-text="windDegree"></span>°</p>
-                <p>Gust: <span x-text="gustKph"></span> km/h</p>
-            </div>
+                <!-- TEMP GRID -->
+                <div class="grid grid-cols-2 gap-2 text-sm mb-2 text-white">
 
-            <!-- Air -->
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Air Quality</p>
-                <p>CO: <span x-text="airCo"></span></p>
-                <p>NO₂: <span x-text="airNo"></span></p>
-                <p>O₃: <span x-text="airO"></span></p>
-                <p>PM 10: <span x-text="airPmTen"></span></p>
-                <p>PM 2.5: <span x-text="airPm"></span></p>
-            </div>
+                    <div><b>Avg Temp:</b> <span x-text="f.day.avgtemp_c + ' °C'"></span></div>
+                    <div><b>Max Temp:</b> <span x-text="f.day.maxtemp_c + ' °C'"></span></div>
+                    <div><b>Min Temp:</b> <span x-text="f.day.mintemp_c + ' °C'"></span></div>
+                    <div><b>Humidity:</b> <span x-text="f.day.avghumidity + '%'"></span></div>
+                    <div><b>Wind:</b> <span x-text="f.day.maxwind_kph + ' kph'"></span></div>
+                    <div><b>Condition:</b> <span x-text="f.day.condition.text"></span></div>
 
-            <!-- Misc -->
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Humidity</p>
-                <p x-text="humidity"></p>
-            </div>
+                </div>
 
-            <div class="bg-white/10 p-4 rounded-xl">
-                <p class="font-semibold">Precip (mm)</p>
-                <p x-text="precipMm"></p>
-            </div>
+                <!-- RAIN -->
+                <div x-show="f.day.daily_will_it_rain != 0" class="mb-2 bg-blue-900/20 border border-blue-700/30 rounded-lg p-2">
+                    <b>🌧 Rain Chance:</b> <span x-text="f.day.daily_chance_of_rain + '%'"></span>, 
+                    <b>Precip:</b> <span x-text="f.day.totalprecip_mm + ' mm'"></span>
+                </div>
+
+                <!-- SNOW -->
+                <div x-show="f.day.daily_will_it_snow != 0" class="mb-2 bg-indigo-900/20 border border-indigo-700/30 rounded-lg p-2">
+                    <b>❄ Snow Chance:</b> <span x-text="f.day.daily_chance_of_snow + '%'"></span>, 
+                    <b>Snowfall:</b> <span x-text="f.day.totalsnow_cm + ' cm'"></span>
+                </div>
+
+                <!-- ASTRONOMY -->
+                <div class="text-xs border-t border-white/30 pt-2 mt-2 text-white">
+                    <p><b>Moon Phase:</b> <span x-text="f.astro.moon_phase"></span></p>
+                    <p><b>Moon Illumination:</b> <span x-text="f.astro.moon_illumination + '%'"></span></p>
+                    <p><b>Moonrise:</b> <span x-text="f.astro.moonrise"></span></p>
+                    <p><b>Moonset:</b> <span x-text="f.astro.moonset"></span></p>
+                    <p><b>Sunrise:</b> <span x-text="f.astro.sunrise"></span></p>
+                    <p><b>Sunset:</b> <span x-text="f.astro.sunset"></span></p>
+                </div>
+
+            </li>
+        </template>
+
+    </ul>
+</div>
+
 
         </div>
     </div>
@@ -108,6 +183,10 @@
 <script>
     function Weather(){
         return{
+            chart: null,
+            alone:true,
+            forecast:[],
+            days:2,
             c:"", 
             dewC:"",
             feelC:"",
@@ -133,7 +212,6 @@
             airNo:"",
             airO:"",
             airPmTen:"",
-            airpm:"",
             airSo:"",
             uv:"",
             visKm:"",
@@ -152,7 +230,7 @@ windchill_f: 33.5
             */
             
             GetWeather(){
-                fetch("https://api.weatherapi.com/v1/current.json?key=ea2e7c3147e248bf91e145718252102&q=" + this.city + "&aqi=yes")
+                fetch("http://api.weatherapi.com/v1/forecast.json?key=ea2e7c3147e248bf91e145718252102&q=&q=" + this.city + "&days=3&aqi=yes")
                     .then(response => response.json())
                     .then(data => {
                         this.dewC = data.current.dewpoint_c;
@@ -174,7 +252,6 @@ windchill_f: 33.5
                         this.airNo = data.current.air_quality.no2;
                         this.airO = data.current.air_quality.o3;
                         this.airPmTen = data.current.air_quality.pm10;
-                        this.airpm = data.current.air_quality.pm2_5;
                         this.airSo = data.current.air_quality.so2;
                         this.cloud = data.current.cloud;
                         this.conTxt = data.current.condition.text;
@@ -182,8 +259,100 @@ windchill_f: 33.5
                         this.reg = data.location.region;
                         this.country = data.location.country;
                         this.time = data.location.localtime;
-                        console.log(data);
+                        this.forecast = data.forecast.forecastday;
+
+                        this.$nextTick(() => {
+                            this.forecast.forEach((day, i) => {
+
+                                // hourly temperatures for the graph
+                                const hours = day.hour.map(h => h.time.split(" ")[1]);
+                                const temps = day.hour.map(h => h.temp_c);
+                                const dewpoints = day.hour.map(h => h.dewpoint_c);
+                                const feels = day.hour.map(h => h.feelslike_c);
+                                const precip = day.hour.map(h => h.precip_mm);
+                                const snow = day.hour.map(h => h.snow_cm / 10);
+
+                                new Chart(document.getElementById("chart_" + i), {
+                                    type: "line",
+                                    data: {
+                                        labels: hours,
+                                        datasets: [{
+                                            label: "Temperature (°C)",
+                                            data: temps,
+                                            borderColor: "rgba(255,255,255,0.8)",
+                                            backgroundColor: "rgba(255,255,255,0.2)",
+                                            fill: true,
+                                            lineTension: 0.2
+                                        },{
+                                            label: "Dewpoints (°C)",
+                                            data: dewpoints,
+                                            borderColor: "rgba(0,85,160,0.8)",
+                                            backgroundColor: "rgba(0,85,160,0.2)",
+                                            fill: true,
+                                            lineTension: 0.2
+                                        },{
+                                            label: "Feels Like (°C)",
+                                            data: feels,
+                                            borderColor: "rgba(255,120,0,0.8)",
+                                            backgroundColor: "rgba(255,120,0,0.2)",
+                                            fill: true,
+                                            lineTension: 0.2
+                                        }]
+                                    },
+                                    options: {
+                                        legend: { display: true },
+                                        title: {
+                                            display: true,
+                                            text: "Temperature",
+                                            color: "black", 
+                                            fontSize: 16
+                                        },
+                                        scales: {
+                                            yAxes: [{ ticks: { fontColor: "white" } }],
+                                            xAxes: [{ ticks: { fontColor: "white" } }]
+                                        }
+                                    }
+                                });
+                                new Chart(document.getElementById("chartR_" + i), {
+                                    type: "line",
+                                    data: {
+                                        labels: hours,
+                                        datasets: [{
+                                            label: "Rain mm",
+                                            data: precip,
+                                            borderColor: "rgba(0,85,160,0.8)",
+                                            backgroundColor: "rgba(0,85,160,0.2)",
+                                            fill: true,
+                                            lineTension: 0.2
+                                        },{
+                                            label: "Snow mm",
+                                            data: snow,
+                                            borderColor: "rgba(255,255,255,0.8)",
+                                            backgroundColor: "rgba(255,255,255,0.2)",
+                                            fill: true,
+                                            lineTension: 0.2
+                                        }]
+                                    },
+                                    options: {
+                                        legend: { display: true },
+                                        title: {
+                                            display: true,
+                                            text: "Rain and Snow",
+                                            color: "black", 
+                                            fontSize: 16
+                                        },
+                                        scales: {
+                                            yAxes: [{ ticks: { fontColor: "white" } }],
+                                            xAxes: [{ ticks: { fontColor: "white" } }]
+                                        }
+                                    }
+                                });
+ 
+                            });
+
+                        console.log(this.forecast);
                     });
+                })
             }
         }
     }
